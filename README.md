@@ -81,14 +81,12 @@ finance_rag_system11/
 │   ├── bm25_retriever.py          # BM25检索
 │   ├── embedding_model.py         # Embedding模型
 │   ├── knowledge_builder.py       # 知识库构建
-│   ├── knowledge_builder.bak      # 备份
 │   ├── llm_service.py             # LLM服务
 │   ├── retriever.py               # 检索器
 │   └── vector_db.py               # 向量数据库
 ├── static/                         # 静态资源
 │   └── css/
 │       ├── style.css              # 样式文件
-│       └── style.css.bak          # 样式备份
 ├── templates/                      # HTML模板
 │   ├── base.html                  # 基础模板
 │   ├── chat.html                  # 对话页面

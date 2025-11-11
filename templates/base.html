@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金融客服RAG系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">💰 金融客服RAG系统</h1>
+            <div class="nav-links">
+                <a href="/" class="active">首页</a>
+                <a href="/upload">知识库</a>
+                <a href="/chat">客服</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome">
+            <h2>欢迎使用金融客服工作辅助系统</h2>
+            <p>基于RAG技术的智能客服系统，整合QA库+文档库+LLM</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>📚 知识库管理</h3>
+                    <p>支持PDF、TXT、JSON格式</p>
+                    <a href="/upload" class="btn">上传知识</a>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🤖 智能问答</h3>
+                    <p>五层级联检索，精准回答</p>
+                    <a href="/chat" class="btn">开始聊天</a>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>⚡ 快速检索</h3>
+                    <p>向量+关键词混合检索</p>
+                    <p style="font-size: 12px; margin-top: 10px;">直接返回、LLM增强、自由生成</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

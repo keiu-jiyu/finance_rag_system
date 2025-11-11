@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="chat-panel">
+        <div class="chat-header">
+            <h2>🤖 智能客服</h2>
+            <p>基于RAG的五层级联检索系统</p>
+        </div>
+
+        <!-- 聊天记录 -->
+        <div class="chat-messages" id="chat-messages"></div>
+
+        <!-- 信息盒 -->
+        <div class="info-box" id="info-box" style="display: none;">
+            <div class="info-item">
+                <strong>📍 检索层级:</strong> <span id="info-layer"></span>
+            </div>
+            <div class="info-item">
+                <strong>📚 数据源:</strong> <span id="info-source"></span>
+            </div>
+            <div class="info-item">
+                <strong>🎯 置信度:</strong> <span id="info-confidence"></span>
+            </div>
+            <div class="info-item" id="contexts-info" style="display: none;">
+                <strong>📖 参考文献:</strong>
+                <div id="contexts-list" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- 输入框 -->
+        <div class="chat-input-area">
+            <input 
+                type="text" 
+                id="user-input" 
+                placeholder="请输入您的问题..."
+                @keyup.enter="sendMessage"
+            >
+            <button id="send-btn" class="btn btn-primary">发送</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const infoBox = document.getElementById('info-box');
+
+    // 添加消息到聊天框
+    function addMessage(text, sender = 'user', info = null) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message message-${sender}`;
+        msgDiv.textContent = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        if (info) {
+            showInfo(info);
+        }
+    }
+
+    // 显示检索信息
+    function showInfo(info) {
+        document.getElementById('info-layer').textContent = `第${info.layer}层 - ${['', 'Query库', 'QA库', 'Doc库', 'BM25', '自由生成'][info.layer]}`;
+        document.getElementById('info-source').textContent = info.source;
+        document.getElementById('info-confidence').textContent = (info.confidence * 100).toFixed(1) + '%';
+        
+        if (info.contexts && info.contexts.length > 0) {
+            const contextsList = document.getElementById('contexts-list');
+            contextsList.innerHTML = info.contexts.map((c, i) => `
+                <div style="margin: 5px 0; font-size: 12px; color: #666;">
+                    📌 参考${i+1}: ${c.substring(0, 100)}...
+                </div>
+            `).join('');
+            document.getElementById('contexts-info').style.display = 'block';
+        }
+        
+        infoBox.style.display = 'block';
+    }
+
+    // 发送消息
+    async function sendMessage() {
+        const query = userInput.value.trim();
+        if (!query) return;
+
+        // 显示用户消息
+        addMessage(query, 'user');
+        userInput.value = '';
+        sendBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({query})
+            });
+
+            const result = await response.json();
+            
+            if (result.code === 200) {
+                addMessage(result.data.answer, 'assistant', result.data);
+            } else {
+                addMessage(`❌ 错误: ${result.msg}`, 'assistant');
+            }
+        } catch (e) {
+            addMessage(`❌ 请求失败: ${e.message}`, 'assistant');
+        } finally {
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // 欢迎消息
+    setTimeout(() => {
+        addMessage('👋 欢迎使用金融客服系统！请输入您的问题，我会为您查询知识库并给出专业回答。');
+    }, 500);
+</script>
+{% endblock %}

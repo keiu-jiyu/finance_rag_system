@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="panel">
+        <h2>📚 知识库管理</h2>
+        
+        <!-- 统计信息 -->
+        <div class="stats-box">
+            <h3>知识库统计</h3>
+            <div class="stat-items">
+                <div class="stat-item">
+                    <span class="stat-label">Query库</span>
+                    <span class="stat-value" id="query-count">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">QA库</span>
+                    <span class="stat-value" id="qa-count">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Doc库</span>
+                    <span class="stat-value" id="doc-count">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">总计</span>
+                    <span class="stat-value" id="total-count">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 上传表单 -->
+        <div class="upload-section">
+            <h3>📤 上传文件</h3>
+            
+            <div class="form-group">
+                <label>选择知识库类型</label>
+                <select id="kb-type">
+                    <option value="docs">📄 文档库 (PDF/TXT)</option>
+                    <option value="qa">❓ QA库 (JSON)</option>
+                </select>
+            </div>
+
+            <div class="upload-area" id="upload-area">
+                <input type="file" id="file-input" multiple accept=".pdf,.txt,.json">
+                <p>🖱️ 点击选择文件或拖放到这里</p>
+                <p style="font-size: 12px;">支持格式: PDF、TXT、JSON</p>
+            </div>
+
+            <button class="btn btn-primary" id="upload-btn">上传</button>
+        </div>
+
+        <!-- 上传状态 -->
+        <div id="upload-status" class="status-box" style="display: none;">
+            <p id="status-message"></p>
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <!-- QA样例 -->
+        <div class="sample-section">
+            <h3>📋 QA JSON格式示例</h3>
+            <pre><code>[
+  {
+    "question": "美联储加息对股市有什么影响？",
+    "answer": "加息会提高企业融资成本，降低盈利预期，可能导致股价下跌，尤其是成长股"
+  },
+  {
+    "question": "什么是黑天鹅事件？",
+    "answer": "黑天鹅事件指极罕见、难以预测但影响巨大的事件，具有三个特点：不可预测性、极端影响、事后可解释性"
+  }
+]</code></pre>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+    // 加载统计信息
+    function loadStats() {
+        fetch('/api/kb-stats')
+            .then(r => r.json())
+            .then(data => {
+                if (data.code === 200) {
+                    document.getElementById('query-count').textContent = data.data.query_count;
+                    document.getElementById('qa-count').textContent = data.data.qa_count;
+                    document.getElementById('doc-count').textContent = data.data.doc_count;
+                    document.getElementById('total-count').textContent = data.data.total_count;
+                }
+            });
+    }
+
+    // 文件上传逻辑
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const statusBox = document.getElementById('upload-status');
+    const statusMsg = document.getElementById('status-message');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#4CAF50';
+    });
+
+    uploadArea.addEventListener('dragleave', (e) => {
+        uploadArea.style.borderColor = '#ddd';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#ddd';
+        fileInput.files = e.dataTransfer.files;
+    });
+
+    uploadBtn.addEventListener('click', async () => {
+        const files = fileInput.files;
+        const kbType = document.getElementById('kb-type').value;
+        
+        if (files.length === 0) {
+            alert('请选择文件');
+            return;
+        }
+
+        statusBox.style.display = 'block';
+        
+        for (let file of files) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', kbType);
+            
+            statusMsg.textContent = `正在上传: ${file.name}...`;
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                statusMsg.textContent = result.msg;
+                
+                if (result.code === 200) {
+                    loadStats();
+                }
+            } catch (e) {
+                statusMsg.textContent = `❌ 上传失败: ${e.message}`;
+            }
+        }
+    });
+
+    // 初始化
+    loadStats();
+    setInterval(loadStats, 5000);
+</script>
+{% endblock %}

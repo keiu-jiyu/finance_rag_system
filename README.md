@@ -76,26 +76,31 @@ python app.py
 ## 📁 项目结构
 
 ```
-finance_rag_system/
-├── app.py                          # Flask主程序
-├── config.py                       # 配置文件
-├── rag_system.py                   # RAG核心逻辑
-├── embedding_manager.py            # Embedding管理
-├── retrieval_engine.py             # 检索引擎
-├── llm_client.py                   # LLM调用
-├── knowledge_base.py               # 知识库管理
-├── templates/
-│   ├── index.html                  # 主页
-│   ├── chat.html                   # 对话页面
-│   └── admin.html                  # 管理页面
-├── static/
-│   ├── css/style.css               # 样式
-│   └── js/chat.js                  # 交互脚本
-├── data/
-│   ├── chroma_db/                  # Chroma向量库
-│   └── knowledge_base.json         # 知识库数据
-├── requirements.txt                # 依赖列表
+finance_rag_system11/
+├── modules/                        # 核心模块
+│   ├── bm25_retriever.py          # BM25检索
+│   ├── embedding_model.py         # Embedding模型
+│   ├── knowledge_builder.py       # 知识库构建
+│   ├── knowledge_builder.bak      # 备份
+│   ├── llm_service.py             # LLM服务
+│   ├── retriever.py               # 检索器
+│   └── vector_db.py               # 向量数据库
+├── static/                         # 静态资源
+│   └── css/
+│       ├── style.css              # 样式文件
+│       └── style.css.bak          # 样式备份
+├── templates/                      # HTML模板
+│   ├── base.html                  # 基础模板
+│   ├── chat.html                  # 对话页面
+│   └── upload.html                # 上传页面
+├── data/                           # 数据目录
+│   └── chroma_db/                 # Chroma向量库
+├── models/                         # 模型存储目录
+├── uploads/                        # 上传文件目录
+├── venv/                           # 虚拟环境
 ├── .env                            # 环境变量
+├── app.py                          # Flask主程序 ⭐
+├── requirements.txt                # 依赖列表
 └── README.md                       # 项目说明
 ```
 
